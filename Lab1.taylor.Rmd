@@ -1,0 +1,60 @@
+---
+title: "Lab1"
+author: "Claudius Taylor"
+date: "9/1/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Generating random variables
+```{r}
+a <- rnorm(10,0,1)
+b <- rnorm(50,0,1)
+c <- rnorm(100,0,1)
+d <- rnorm(1000,0,1)
+```
+
+## Estimating first 10 autocovarinace, autocorrelation and plotting the trajectories and correlogram
+```{r}
+acf(a)
+plot(a,type='l',ylab="White Noise",frame.plot=FALSE)
+
+acf(b,10)
+plot(b,type='l',ylab="White Noise",frame.plot=FALSE)
+
+acf(c,10)
+plot(c,type='l',ylab="White Noise",frame.plot=FALSE)
+
+acf(d,10)
+plot(d,type='l',ylab="White Noise",frame.plot=FALSE)
+```
+
+## Generating random variables for 
+$$ N(0, \sigma^2 \neq 1) $$
+
+```{r}
+aa <- rnorm(10,0,2)
+bb <- rnorm(50,0,2)
+cc <- rnorm(100,0,2)
+dd <- rnorm(1000,0,2)
+```
+
+## Estimating first 10 autocovarinace, autocorrelation and plotting the trajectories and correlogram
+```{r}
+acf(aa,10)
+plot(aa,type='l',ylab="White Noise",frame.plot=FALSE)
+
+acf(bb,10)
+plot(bb,type='l',ylab="White Noise",frame.plot=FALSE)
+
+acf(cc,10)
+plot(cc,type='l',ylab="White Noise",frame.plot=FALSE)
+
+acf(dd,10)
+plot(dd,type='l',ylab="White Noise",frame.plot=FALSE)
+```
+
+## It can be concluded that the significance bounds (confidence limits) becomes narrower as n increases from n = 10, 50, 100, 1000. Also Lag 0 equals 1 for all variables. Values outside the limits are considered to have significant correlation. The correlogram does not change for variance not equal to 1.
