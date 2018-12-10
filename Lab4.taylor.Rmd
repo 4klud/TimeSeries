@@ -1,0 +1,64 @@
+---
+title: "Lab4"
+author: "Claudius Taylor"
+date: "9/19/2018"
+output: pdf_document
+---
+
+```{r results='asis', echo=FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
+library(TSA)
+library(dplyr)
+library(astsa)
+library(tseries)
+library(timeSeries)
+library(tidyverse)
+library(memisc)
+```
+
+## 1. Fit a cubic polynomial (centered) model to the chicken data and see if it improves the fit. Have the data and the cubic fit in one plot.
+
+
+```{r}
+t1= time(chicken)-mean(time(chicken)) # centered
+t2= t1^2
+t3= t1^3
+
+chick.lm<-lm(chicken ~ t1+t2+t3, na.action=NULL)
+summary(lm(chicken ~ ., data = chicken))
+summary(chick.lm)
+
+par(mfrow=c(2,1))
+acf(chicken, lag.max = 60, main="ACF for Chicken Data")
+
+ts.plot(chicken, ylab="", col=4, lwd=2)
+lines(fitted(chick.lm), col="red")
+```
+
+## 2. Generate a signal 
+$$x_t = 1 + 3t + e_t$$, with n = 200 and where  1) $$e_t = N(0,100)$$ 2) $$e_t = 0.3w_t - 0.3w_{(t-1)} + 0.4w_{(t-2)}$$
+
+
+```{r}
+set.seed(123)
+par(mfrow=c(2,1))
+n=200
+et = rnorm(n,0,100)
+t=1:n
+sig1= 1 +3*t +et
+sig1.lm= lm(sig1 ~ t)
+plot(sig1, type = "l", main="et ~ N(0,100)")
+et1 = filter(et,filter = c(0.3,0.3,0.4), method = c("convolution","recursive"),sides=2)
+sig2= 1 +3*t +et1
+sig2.lm <-lm(sig2 ~ t)
+plot(sig2, type = "l",main="et ~ 0.3wt - 0.3wt-1 + 0.4wt-2")
+```
+
+## 3. For 1 and 2 above, estimate and remove the trend. Examine the acf of the residuals
+
+```{r}
+acf(resid(chick.lm), 60, main="Detrended Chicken")
+acf(resid(sig1.lm), 60, main= "Detrended signal-1") 
+acf(resid(sig2.lm), 60, main= "Detrended signal-2")
+```
+
