@@ -1,0 +1,40 @@
+---
+title: "Lab 6"
+author: "Claudius Taylor"
+date: "10/10/2018"
+output: pdf_document
+---
+
+```{r results='asis', echo=FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
+library(TSA)
+library(dplyr)
+library(astsa)
+library(tseries)
+```
+
+## Consider the luteinizing hormone (data(lh) from library(datasets)) in blood samples at 10min intervals from a human female, 48 samples. Is the pattern of the ACF consitent with a stationary AR model?
+
+```{r}
+hormone = ts(lh, frequency = 10)
+acf(hormone, lag.max = "m")
+```
+
+# The pattern is consistent with stationarity as it decay gradually drops to zero as lag increases
+
+## Simulate an AR(3) using n = 50 and the coefficients = c(0.64, -0.06, -0.22). Using the coefficients, is this a stationary AR(3)? Compare the theoretical ACF with the ACF of the luteinizing hormone data. Observations?
+
+```{r}
+ar3 <- arima.sim(list(order = c(3,0,0), ar = c(0.64, -0.06, -0.22)), n = 50)
+plot(ar3,ylab=expression(x[t]),xlab="Time",type="l")
+
+z = c(0.64, -0.06, -0.22)
+Mod(polyroot(z))
+
+# comparing acf's
+acf(ar3,lag.max = "m")
+acf(lh, lag.max = "m")
+```
+
+# Yes AR(3) model $$x_t = 0.64x_{t-1}-0.06x_{t-2} -0.22x_{t-2}+ w_t$$ is stationary since all its roots has magnitude greater than 1.
+# Both data shows stationarity but the luteinizing hormone data decays faster than the AR(3) model.
