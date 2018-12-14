@@ -1,0 +1,92 @@
+---
+title: "Australian beer"
+author: "Claudius Taylor"
+date: "10/5/2018"
+output: pdf_document
+---
+
+```{r results='asis', echo=FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
+library(TSA)
+library(dplyr)
+library(astsa)
+library(tseries)
+library(data.table)
+library(forecast)
+library(timeSeries)
+library(CombMSC)
+```
+
+
+```{r}
+data2 = ("/Users/taylormade/Desktop/Time Series/Australian Beer.txt")
+beer = read.table(file = data2, stringsAsFactors = FALSE, sep = ",", header = TRUE)
+class(beer)
+beer = ts(beer$Production, start = 1956, frequency = 12) # convert to Time Series
+decomp.beer = decompose(beer, type="additive") # decompose the data
+plot(decomp.beer)
+decomp.beer$figure # seasonal effects for each quarter
+seasonplot(beer, col=rainbow(12), year.labels=TRUE)
+monthplot(beer, col = 4, lwd = 1.5)
+boxplot(beer ~ cycle(beer), col=rainbow(12))
+```
+
+## Plotting the data shows a seasonal pattern oscillating with spikes and valleys. The dataset is probably not stationary.
+
+```{r}
+# plot the ACF and PACF on the same graph
+acf(beer)
+pacf(beer)
+```
+
+## Based on the graph we see that the ACF does not tail off quickly hence it is not stationary, so we need to do some diffencing to get it to become stationary.
+
+```{r}
+# differencing the series and plot
+d.beer = diff(beer)
+plot(d.beer)
+# par(mfrow=c(1,2))
+acf(d.beer)
+pacf(d.beer)
+```
+
+## Now we see the graph no longer has a trend to it. However we can see these oscillating spikes keep getting larger as we move from left to right, which means there is heterostadaticity or non-constant variance. The ACF tails off quickly and there are regular spikes at every 12th period which corresponds to this being monthly data. So each 12th period is correlated with the previous 12. So annually there's a periodicity to it.
+
+```{r}
+library(forecast)
+# fit ARIMA model
+beer.fit = arima(beer, order = c(1,1,0),
+                 seasonal = list(order = c(1,1,0), period = 12),
+                 include.mean = FALSE)
+beer.fit
+```
+
+```{r}
+# residuals analysis
+par(mfrow=c(1,2))
+acf(ts(beer.fit$residuals),main='ACF Residual')
+pacf(ts(beer.fit$residuals),main='PACF Residual')
+```
+
+## Since there are spikes outside the insignificant zone for both ACF and PACF plots we can conclude that there are Moving average and Autoregressive pattern in the residuals and thus the residuals is NOT random in nature which is not desirable outcome.
+
+```{r}
+# generate predictions
+beer.pred = predict(beer.fit, n.ahead = 12) # predict 12 periods ahead
+plot(beer, type = "l", xlim=c(1985,1997), ylim=c(50,250), xlab = "Year", ylab = "Production")
+lines(beer.pred$pred, col = "blue") # mean of predictions into future (actual)
+lines(beer.pred$pred + 2*beer.pred$se, col = "red") # prediction bounds +1.96
+lines(beer.pred$pred - 2*beer.pred$se, col = "red") # prediction bounds -1.96
+```
+
+## Blue line is the actual predictions, red lines the prediction bounds where the uncertainty predictions will fall for my future values. The blue looks like it's mimicking what's occurring in the previous time periods, 12 periods back. Prediction bounds also have zigzag in it reflecting that seasonality shape
+
+
+
+
+
+
+
+
+
+
